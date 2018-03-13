@@ -67,6 +67,20 @@
 
 
 - (void) getWiFiIPAddress:(CDVInvokedUrlCommand*)command
+- (NSString *)currentWifiSSID {
+    // Does not work on the simulator.
+    NSString *ssid = nil;
+    NSArray *ifs = (__bridge_transfer id)CNCopySupportedInterfaces();
+    for (NSString *ifnam in ifs) {
+        NSDictionary *info = (__bridge_transfer id)CNCopyCurrentNetworkInfo((__bridge CFStringRef)ifnam);
+        if (info[@"SSID"]) {
+            ssid = info[@"SSID"];
+        }
+    }
+    return ssid;
+}
+
+- (void) getIPAddress:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
     NSArray* ipinfo = [self getWiFiIP];
@@ -93,6 +107,20 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsMultipart:@[ipaddr, ipsubnet]];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No valid IP address identified"];
+    }
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) getSSID:(CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = nil;
+    NSString* ssid = [self currentWifiSSID];
+
+    if (ssid != nil) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:ssid];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

@@ -28,6 +28,8 @@ public class networkinterface extends CordovaPlugin {
 	public static final String GET__WIFI_IP_ADDRESS="getWiFiIPAddress";
 	public static final String GET_CARRIER_IP_ADDRESS="getCarrierIPAddress";
 	private static final String TAG = "cordova-plugin-networkinterface";
+	public static final String GET_IP_ADDRESS="getIPAddress";
+	public static final String GET_SSID="getSSID";
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -59,6 +61,10 @@ public class networkinterface extends CordovaPlugin {
 				result.add(new PluginResult(PluginResult.Status.OK, ip));
 				result.add(new PluginResult(PluginResult.Status.OK, subnet));
 				callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+				return true;
+			} else if (GET_SSID.equals(action)) {
+				String ssid = getSSID();
+				callbackContext.success(ip);
 				return true;
 			}
 			callbackContext.error("Error no such method '" + action + "'");
@@ -138,5 +144,12 @@ public class networkinterface extends CordovaPlugin {
 		catch(Exception e){
 		}
 		return null;
+	}
+
+	private String getSSID() {
+		WifiManager wifiManager = (WifiManager) cordova.getActivity().getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+		return wifiInfo.getSSID();
 	}
 }
